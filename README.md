@@ -1,2 +1,3 @@
 # PLOG
-strategic enterprise Prolog project
+
+Repos for prolog Projects
