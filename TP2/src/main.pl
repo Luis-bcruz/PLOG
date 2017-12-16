@@ -2,11 +2,6 @@
 :-use_module(library(random)).
 :-use_module(library(lists)).
 
-% Variaveis:
-%   - Medidas: conjuntos de critérios
-%   - Critérios: valores positivos ou negativos
-%   - Prioridades: valores entre 0 1 cuja soma tem de ser  igual a 1
-%   - Orçamento: valor positivo
 estrategia:-
         write('Para correr, deve escrever:'),nl,
         write('estrategia(NumMedidas,NumCriterios)'),nl,
@@ -15,21 +10,77 @@ estrategia:-
         nl.
 
 estrategia(NumMedidas,NumCriterios):-
-        length(Criterios,5),
-        length(Medidas,5),
-        all_distinct(Criterios),
-        all_distinct(Medidas),
-        domain(Criterios, -10, 10),
-        labeling([value(enume)],Criterios),
-        divideCri(Criterios,DecimalCriterios),
+        gerarMedidas(NumMedidas,NumCriterios,Medidas),
+        gerarPrioridades(NumCriterios,Prioridades),
+        gerarCustos(NumMedidas,Custos),
         
-        prioridades(NumCriterios,Prioridades),
-        custos(NumMedidas,Custos),
         
+        write('Prioridades = '),write(Prioridades),nl,
+        write('Medidas     = '),write(Medidas),nl,
         Orcamento = 1200,
         
-        calc_Melhoria(Criterios,Prioridades,ListMelhoria),
-        sumlist(ListMelhoria,Melhoria).
+        calcMelhorias(Medidas,Prioridades,ListaMelhorias),
+        write('Melhorias   = '),write(ListaMelhorias),nl,
+        lista_max(ListaMelhorias, Melhoria),
+        nth1(Index,ListaMelhorias,Melhoria),
+        nth1(Index,Custos,Custo),
+        
+        Custo #<= Orcamento,
+        write('Custos      = '),write(Custos),nl,
+        write('Melhoria    = '),write(Melhoria),nl,
+        write('Custo       = '),write(Custo),nl.
+        
+lista_max([Medida|Resto], MaxCriterio) :-
+    lista_max_AUX(Resto, Medida, MaxCriterio).
+
+lista_max_AUX([], MaxCriterio, MaxCriterio).
+lista_max_AUX([Medida| Resto], Max0, MaxCriterio) :-
+    MaxNovo #= max(Max0,Medida),
+    lista_max_AUX(Resto, MaxNovo, MaxCriterio).
+
+calcMelhorias([],_,[]).
+calcMelhorias([Medida | RestoMedidas] ,Prioridades,ListaMelhorias):-
+        calcMelhorias(RestoMedidas,Prioridades,NovaMelhoria),
+        calcProducto(Medida,Prioridades,Producto),
+        sumlist(Producto,Melhoria),
+        %format('~2f',[Melhoria]),
+        ListaMelhorias = [Melhoria| NovaMelhoria].
+       
+
+calcProducto([],[],_).
+calcProducto([Cri | RestoCri],[Prio | RestoPrio], Melhorias):-
+        calcProducto(RestoCri,RestoPrio,NovaMelhoria),
+        Melhoria is Cri*Prio,
+        Melhorias = [Melhoria | NovaMelhoria].
+
+gerarPrioridades(NumPrioridades,Prioridades):-
+        length(Prioridades,NumPrioridades),
+        domain(Prioridades,1,10),
+        sum(Prioridades,#=,10),
+        labeling([value(enume)],Prioridades).
+        %dividePri(Prioridades,DecimalPrioridades).
+        
+gerarMedidas(0,_,[]).
+gerarMedidas(NumMedidas,NumCriterios,Medidas):-
+       length(Criterios,NumCriterios),
+       all_distinct(Criterios),
+       domain(Criterios, -10, 10),
+       labeling([value(enume)],Criterios),
+       %divideCri(Criterios,DecimalCriterios),
+       Medidas = [Criterios | NovoMedidas],
+       Num1 is NumMedidas - 1,
+       gerarMedidas(Num1,NumCriterios,NovoMedidas).
+
+gerarCustos(NumCustos,Custos):-
+        length(Custos,NumCustos),
+        domain(Custos,1,1500),
+        labeling(value(enume),Custos).
+
+dividePri([],[]).
+dividePri([Prioridade | Resto],Prioridades):-
+       dividePri(Resto,NovaPrioridade),
+       Decimal is Prioridade / 10,
+       Prioridades = [Decimal | NovaPrioridade].
 
 enume(Var,_,BB0,BB):-
        fd_set(Var,Set),
@@ -51,22 +102,9 @@ divideCri([Criterio | Resto],Criterios):-
        Decimal is Criterio / 10,
        Criterios = [Decimal | NovoCriterio].
 
-custos(0,[]).
-custos(M,Custos):-
-        random(100,1200,RandCusto),
-        M1 is M -1,
-        Custos = [RandCusto | NovoRandCusto],
-        custos(M1,NovoRandCusto).
-
 prioridades(0,[]).
 prioridades(N,Prioridades):-
         random(0.0,0.1,Rand),
         N1 is N - 1,
         Prioridades = [Rand | NovoRand],
         prioridades(N1,NovoRand).        
-
-calc_Melhoria([],[],0).
-calc_Melhoria([Cri | TailCriterios],[Prio | TailPrioridades],ListMelhoria):-
-        calc_Melhoria(TailCriterios,TailPrioridades,NewMelhoria),
-        Melhoria is Cri*Prio,
-        ListMelhoria = [ Melhoria| NewMelhoria].
