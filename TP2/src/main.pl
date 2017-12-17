@@ -10,25 +10,29 @@ estrategia:-
         nl.
 
 estrategia(NumMedidas,NumCriterios):-
+        statistics(walltime,_),
         gerarMedidas(NumMedidas,NumCriterios,Medidas),
         gerarPrioridades(NumCriterios,Prioridades),
         gerarCustos(NumMedidas,Custos),
-        
-        
-        write('Prioridades = '),write(Prioridades),nl,
-        write('Medidas     = '),write(Medidas),nl,
         Orcamento = 1200,
-        
         calcMelhorias(Medidas,Prioridades,ListaMelhorias),
         write('Melhorias   = '),write(ListaMelhorias),nl,
         lista_max(ListaMelhorias, Melhoria),
         nth1(Index,ListaMelhorias,Melhoria),
         nth1(Index,Custos,Custo),
-        
-        Custo #<= Orcamento,
+        Custo #=< Orcamento,
+        Melhoria #>= 0,
+        dividePri(Prioridades,PrioridadesDivididas),
+        divideCri(ListaMelhorias,MelhoriasDivididas),
+        MelhoriaDividida is Melhoria / 10,
+        statistics(walltime, [_, ElapsedTime | _]),
+        write('Prioridades = '),write(PrioridadesDivididas),nl,
+        write('Medidas     = '),write(MelhoriasDivididas),nl,
         write('Custos      = '),write(Custos),nl,
-        write('Melhoria    = '),write(Melhoria),nl,
-        write('Custo       = '),write(Custo),nl.
+        write('Melhoria    = '),write(MelhoriaDividida),nl,
+        write('Custo       = '),write(Custo),nl,
+        format('An answer has been found!~nElapsed time: ~3d seconds', ElapsedTime), nl,
+        fd_statistics.
         
 lista_max([Medida|Resto], MaxCriterio) :-
     lista_max_AUX(Resto, Medida, MaxCriterio).
@@ -73,7 +77,7 @@ gerarMedidas(NumMedidas,NumCriterios,Medidas):-
 
 gerarCustos(NumCustos,Custos):-
         length(Custos,NumCustos),
-        domain(Custos,1,1500),
+        domain(Custos,1,3000),
         labeling(value(enume),Custos).
 
 dividePri([],[]).
