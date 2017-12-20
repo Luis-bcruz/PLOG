@@ -2,6 +2,7 @@
 :-use_module(library(random)).
 :-use_module(library(lists)).
 
+
 estrategia:-
         write('Para correr, deve escrever:'),nl,
         write('estrategia(NumMedidas,NumCriterios)'),nl,
@@ -16,7 +17,7 @@ estrategia(NumMedidas,NumCriterios):-
         gerarCustos(NumMedidas,Custos),
         Orcamento = 1200,
         calcMelhorias(Medidas,Prioridades,ListaMelhorias),
-        write('Melhorias   = '),write(ListaMelhorias),nl,
+        write('Medidas   = '),write(Medidas),nl,
         lista_max(ListaMelhorias, Melhoria),
         nth1(Index,ListaMelhorias,Melhoria),
         nth1(Index,Custos,Custo),
@@ -47,7 +48,6 @@ calcMelhorias([Medida | RestoMedidas] ,Prioridades,ListaMelhorias):-
         calcMelhorias(RestoMedidas,Prioridades,NovaMelhoria),
         calcProducto(Medida,Prioridades,Producto),
         sumlist(Producto,Melhoria),
-        %format('~2f',[Melhoria]),
         ListaMelhorias = [Melhoria| NovaMelhoria].
        
 
@@ -62,7 +62,6 @@ gerarPrioridades(NumPrioridades,Prioridades):-
         domain(Prioridades,1,10),
         sum(Prioridades,#=,10),
         labeling([value(enume)],Prioridades).
-        %dividePri(Prioridades,DecimalPrioridades).
         
 gerarMedidas(0,_,[]).
 gerarMedidas(NumMedidas,NumCriterios,Medidas):-
@@ -70,7 +69,6 @@ gerarMedidas(NumMedidas,NumCriterios,Medidas):-
        all_distinct(Criterios),
        domain(Criterios, -10, 10),
        labeling([value(enume)],Criterios),
-       %divideCri(Criterios,DecimalCriterios),
        Medidas = [Criterios | NovoMedidas],
        Num1 is NumMedidas - 1,
        gerarMedidas(Num1,NumCriterios,NovoMedidas).
@@ -78,7 +76,8 @@ gerarMedidas(NumMedidas,NumCriterios,Medidas):-
 gerarCustos(NumCustos,Custos):-
         length(Custos,NumCustos),
         domain(Custos,1,3000),
-        labeling(value(enume),Custos).
+        labeling(value(enume),Custos),
+        write(Custos).
 
 dividePri([],[]).
 dividePri([Prioridade | Resto],Prioridades):-
