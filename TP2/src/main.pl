@@ -85,19 +85,7 @@ dividePri([Prioridade | Resto],Prioridades):-
        Decimal is Prioridade / 10,
        Prioridades = [Decimal | NovaPrioridade].
 
-enume(Var,_,BB0,BB):-
-       fd_set(Var,Set),
-       select_best_value(Set,Value),
-       (
-          first_bound(BB0,BB), Var #= Value;
-          later_bound(BB0,BB), Var #\= Value
-       ).
 
-select_best_value(Set,BestValue):-
-        fdset_to_list(Set,Lista),
-        length(Lista,Len),
-        random(0,Len,RandomIndex),
-        nth0(RandomIndex,Lista,BestValue).
                            
 divideCri([],[]).
 divideCri([Criterio | Resto],Criterios):-
